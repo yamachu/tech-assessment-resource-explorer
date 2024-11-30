@@ -9,6 +9,13 @@ import {
 
 import "./tailwind.css";
 
+import { ClerkProvider } from "@clerk/clerk-react";
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Add your Clerk publishable key to the .env file");
+}
+
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -41,5 +48,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <Outlet />
+    </ClerkProvider>
+  );
 }
