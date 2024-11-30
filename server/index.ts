@@ -6,13 +6,25 @@ const app = new Hono();
 app.use("*", clerkMiddleware());
 
 app.use(async (c, next) => {
+  if (c.req.path === "/") {
+    return await next();
+  }
+
+  const auth = getAuth(c);
+
+  if (auth?.userId === undefined || auth?.userId === null) {
+    return c.json(
+      {
+        message: "Unauthorized",
+      },
+      401
+    );
+  }
+
   await next();
-  c.header("X-Debug", "hono-remix-adapter");
 });
 
 app.get("/api", (c) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = getAuth(c);
   return c.json({
     message: "Hello",
   });
