@@ -32,6 +32,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  setPanelWidth: (width: string) => void
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -114,6 +115,9 @@ const SidebarProvider = React.forwardRef<
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
+    // This append width state
+    const [panelWidth, setPanelWidth] = React.useState(SIDEBAR_WIDTH)
+
     const contextValue = React.useMemo<SidebarContext>(
       () => ({
         state,
@@ -123,8 +127,9 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        setPanelWidth
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, setPanelWidth]
     )
 
     return (
@@ -133,7 +138,7 @@ const SidebarProvider = React.forwardRef<
           <div
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH,
+                "--sidebar-width": panelWidth,
                 "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
                 ...style,
               } as React.CSSProperties
