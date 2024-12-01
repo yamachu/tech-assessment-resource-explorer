@@ -11,10 +11,25 @@ import "./tailwind.css";
 
 import { ClerkProvider } from "@clerk/clerk-react";
 
+import { hc } from "hono/client";
+import type { AppType } from "server";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { HonoClientProvider } from "./hooks/use-hono-client";
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 if (!PUBLISHABLE_KEY) {
   throw new Error("Add your Clerk publishable key to the .env file");
 }
+
+const queryClient = new QueryClient();
+// TODO: use the correct URL, deploy~
+const honoClient = hc<AppType>("", {
+  headers: {
+    credentials: "include",
+  },
+});
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -50,7 +65,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <Outlet />
+      <QueryClientProvider client={queryClient}>
+        <HonoClientProvider client={honoClient}>
+          <Outlet />
+        </HonoClientProvider>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }
