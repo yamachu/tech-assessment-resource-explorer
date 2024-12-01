@@ -152,7 +152,6 @@ function Tree({
         value={[item.path, item.type]}
         isActive={path === item.path}
         onClick={(ev) => {
-          console.log(ev.currentTarget.value);
           if (ev.currentTarget.value.split(",")[1] === "blob") {
             setSelectedPath(ev.currentTarget.value.split(",")[0]);
           }
