@@ -1,9 +1,29 @@
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { Hono } from "hono";
+import { Octokit } from "octokit";
 
-const app = new Hono();
+type Env = {
+  Variables: {
+    octokit: Octokit;
+  };
+};
+
+const app = new Hono<Env>();
 
 app.use("*", clerkMiddleware());
+
+app.use(async (c, next) => {
+  c.set(
+    "octokit",
+    new Octokit({
+      // TODO: use GitHub App based authentication
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      auth: (c.env as any).GITHUB_TOKEN,
+    })
+  );
+
+  await next();
+});
 
 app.use(async (c, next) => {
   if (c.req.path === "/") {
