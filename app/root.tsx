@@ -24,8 +24,7 @@ if (!PUBLISHABLE_KEY) {
 }
 
 const queryClient = new QueryClient();
-// TODO: use the correct URL, deploy~
-const honoClient = hc<AppType>("", {
+const honoClient = hc<AppType>(import.meta.env.VITE_API_URL, {
   headers: {
     credentials: "include",
   },
