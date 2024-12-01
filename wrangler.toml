@@ -17,9 +17,6 @@ pages_build_output_dir = "./build/client"
 # - https://developers.cloudflare.com/pages/functions/bindings/#secrets
 [vars]
 # MY_VARIABLE = "production_value"
-CLERK_PUBLISHABLE_KEY= ""
-CLERK_SECRET_KEY = ""
-GITHUB_TOKEN = ""
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai
