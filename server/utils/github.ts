@@ -17,6 +17,7 @@ export const fetchRepositoryContent = async (
     repo,
     path,
     mediaType: {
+      // NOTE: html だといい感じの html が返ってくるが、img タグの src の変更や setDangerouslyInnerHTML みたいになり微妙なので、自前で変換する
       format: "raw",
     },
   });
