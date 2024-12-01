@@ -14,6 +14,7 @@ export default function Index() {
   return (
     <main>
       <ReactMarkdown
+        className={"prose w-full max-w-full p-4"}
         remarkPlugins={[remarkGfm]}
         urlTransform={(url, key, node) => {
           if (node.tagName === "img") {

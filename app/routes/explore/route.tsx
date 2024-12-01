@@ -72,7 +72,7 @@ function ResizableWrapped({ children }: { children: React.ReactNode }) {
         setPanelWidth(`${layouts[0]}%`);
       }}
     >
-      <ResizablePanel>
+      <ResizablePanel defaultSize={25}>
         <TreeSidebar />
       </ResizablePanel>
       <ResizableHandle />
