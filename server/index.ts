@@ -1,5 +1,6 @@
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { Octokit } from "octokit";
 import { allowedOwners, allowedRepos } from "./constants";
 import {
@@ -17,6 +18,17 @@ type Env = {
 const app = new Hono<Env>();
 
 app.use("*", clerkMiddleware());
+
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+  })
+);
 
 app.use(async (c, next) => {
   c.set(
