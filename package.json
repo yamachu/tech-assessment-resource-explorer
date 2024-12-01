@@ -26,7 +26,9 @@
     "isbot": "^4.1.0",
     "octokit": "4.0.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-markdown": "9.0.1",
+    "remark-gfm": "4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
