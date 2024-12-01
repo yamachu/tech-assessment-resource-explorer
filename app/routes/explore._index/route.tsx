@@ -1,37 +1,18 @@
-import { useState } from "react";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useOwner } from "~/components/Context/OwnerContext";
+import { useRepository } from "~/components/Context/RepositoryContext";
+import { useSelectedPath } from "~/components/Context/SelectedPathContext";
+import { useTextContent } from "~/queries/hooks";
 
-export default function ExploreIndex() {
-  const [content, setContent] = useState("");
-  const [owner] = useState("yamachu");
-  const [repo] = useState("my-articles");
-  const [path] = useState("/c99/Article.md");
+export default function Index() {
+  const owner = useOwner();
+  const repo = useRepository();
+  const path = useSelectedPath();
+  const content = useTextContent(owner, repo, path);
 
   return (
-    <div>
-      <button
-        onClick={() =>
-          fetch(`/api/tree/${owner}/${repo}`, {
-            credentials: "include",
-          })
-            .then((v) => v.json())
-            .then((v) => console.log(v))
-        }
-      >
-        Tree
-      </button>
-      <button
-        onClick={() => {
-          fetch(`/api/content/${owner}/${repo}${path}`, {
-            credentials: "include",
-          })
-            .then((v) => v.json() as Promise<{ body: string }>)
-            .then((v) => setContent(v.body));
-        }}
-      >
-        Fetch
-      </button>
+    <main>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         urlTransform={(url, key, node) => {
@@ -49,7 +30,7 @@ export default function ExploreIndex() {
               // FIXME: like path resolve...
               return (
                 "/api/image/" +
-                `${owner}/${repo}` +
+                `${owner}/${repo}/` +
                 path.substring(0, path.lastIndexOf("/")) +
                 url.substring(1)
               );
@@ -59,8 +40,8 @@ export default function ExploreIndex() {
           return defaultUrlTransform(url);
         }}
       >
-        {content}
+        {content.data ?? ""}
       </ReactMarkdown>
-    </div>
+    </main>
   );
 }
