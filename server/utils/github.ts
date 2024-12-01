@@ -81,18 +81,12 @@ export const fetchRepositoryTree = async (
   });
   const treeSha = commitInfo.data.tree.sha;
 
-  const repositoryFiles = await octokit.request(
-    "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-    {
-      owner,
-      repo,
-      tree_sha: treeSha,
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      recursive: "true",
-    }
-  );
+  const repositoryFiles = await octokit.rest.git.getTree({
+    owner,
+    repo,
+    tree_sha: treeSha,
+    recursive: "true",
+  });
 
   // https://docs.github.com/ja/rest/git/trees?apiVersion=2022-11-28#get-a-tree
   // if repositoryFiles.data.truncated ...
