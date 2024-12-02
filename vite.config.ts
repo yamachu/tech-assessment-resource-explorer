@@ -31,4 +31,10 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  define: {
+    "import.meta.vitest": false,
+  },
+  test: {
+    includeSource: ["app/**/*.{js,ts}", "server/**/*.{js,ts}"],
+  },
 });
