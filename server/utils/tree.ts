@@ -137,3 +137,140 @@ export const appendLeafs = <T extends { path: string }>(
     other: leafAppended.other,
   };
 };
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+  describe("tree", () => {
+    it("dir2Tree", () => {
+      expect(
+        dir2Tree(
+          [
+            {
+              path: "rootDirA",
+            },
+            {
+              path: "rootDirB",
+            },
+            {
+              path: "rootDirA/A",
+            },
+            {
+              path: "rootDirA/B",
+            },
+            {
+              path: "rootDirA/A/D",
+            },
+          ],
+          "",
+          true
+        )
+      ).toStrictEqual({
+        children: [
+          {
+            path: "rootDirA",
+            children: [
+              {
+                path: "rootDirA/A",
+                children: [{ path: "rootDirA/A/D", children: [] }],
+              },
+              {
+                path: "rootDirA/B",
+                children: [],
+              },
+            ],
+          },
+          {
+            path: "rootDirB",
+            children: [],
+          },
+        ],
+        other: [],
+      });
+    });
+
+    it("appendLeafs", () => {
+      expect(
+        appendLeafs(
+          [
+            {
+              path: "rootDirA",
+              children: [
+                {
+                  path: "rootDirA/A",
+                  children: [{ path: "rootDirA/A/D", children: [] }],
+                },
+                {
+                  path: "rootDirA/B",
+                  children: [],
+                },
+              ],
+            },
+            {
+              path: "rootDirB",
+              children: [],
+            },
+          ],
+          [
+            {
+              path: "rootFile",
+            },
+            {
+              path: "rootDirA/fileA",
+            },
+            {
+              path: "rootDirA/B/fileB",
+            },
+            {
+              path: "rootDirA/A/D/fileC",
+            },
+            {
+              path: "rootDirB/fileD",
+            },
+          ],
+          "",
+          true
+        )
+      ).toStrictEqual({
+        children: [
+          {
+            path: "rootDirA",
+            children: [
+              {
+                path: "rootDirA/A",
+                children: [
+                  {
+                    path: "rootDirA/A/D",
+                    children: [{ path: "rootDirA/A/D/fileC" }],
+                  },
+                ],
+              },
+              {
+                path: "rootDirA/B",
+                children: [
+                  {
+                    path: "rootDirA/B/fileB",
+                  },
+                ],
+              },
+              {
+                path: "rootDirA/fileA",
+              },
+            ],
+          },
+          {
+            path: "rootDirB",
+            children: [
+              {
+                path: "rootDirB/fileD",
+              },
+            ],
+          },
+          {
+            path: "rootFile",
+          },
+        ],
+        other: [],
+      });
+    });
+  });
+}
