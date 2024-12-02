@@ -23,7 +23,13 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Add your Clerk publishable key to the .env file");
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 const honoClient = hc<AppType>(import.meta.env.VITE_API_URL, {
   headers: {
     credentials: "include",
