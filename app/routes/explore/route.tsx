@@ -1,4 +1,5 @@
-import { Outlet } from "@remix-run/react";
+import { Outlet, useNavigate } from "@remix-run/react";
+import { useCallback } from "react";
 import {
   OwnerContextProvider,
   useOwner,
@@ -90,11 +91,26 @@ function TreeSidebar() {
   const owners = useOwners();
   const repositories = useRepositories(owner);
   const tree = useGitTree(owner, repository);
+  const navigate = useNavigate();
+  const navigateTo = useCallback(
+    (path: string) => {
+      navigate(`/explore/${owner}/${repository}/${path}`);
+    },
+    [navigate, owner, repository]
+  );
 
   return (
     <Sidebar>
       <SidebarContent className="mt-2">
-        <Select onValueChange={(v) => setOwner(v)}>
+        <Select
+          onValueChange={(v) => {
+            setOwner(v);
+            navigate(`/explore/${v}`, {
+              replace: true,
+            });
+          }}
+          value={owner}
+        >
           <SelectTrigger className="w-11/12 mx-auto">
             <SelectValue placeholder="Owner" />
           </SelectTrigger>
@@ -108,7 +124,16 @@ function TreeSidebar() {
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(v) => setRepository(v)} disabled={owner === ""}>
+        <Select
+          onValueChange={(v) => {
+            setRepository(v);
+            navigate(`/explore/${owner}/${v}`, {
+              replace: true,
+            });
+          }}
+          disabled={owner === ""}
+          value={repository}
+        >
           <SelectTrigger className="w-11/12 mx-auto">
             <SelectValue placeholder="Repository" />
           </SelectTrigger>
@@ -126,7 +151,12 @@ function TreeSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {tree.data?.map((item) => (
-                <Tree key={item.sha} item={item} parent={""} />
+                <Tree
+                  key={item.sha}
+                  item={item}
+                  parent={""}
+                  navigate={navigateTo}
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -139,9 +169,11 @@ function TreeSidebar() {
 function Tree({
   item,
   parent,
+  navigate,
 }: {
   item: Flatten<NonNullable<ReturnType<typeof useGitTree>["data"]>>;
   parent: string;
+  navigate: (path: string) => void;
 }) {
   const path = useSelectedPath();
   const setSelectedPath = useSetSelectedPath();
@@ -154,6 +186,7 @@ function Tree({
         onClick={(ev) => {
           if (ev.currentTarget.value.split(",")[1] === "blob") {
             setSelectedPath(ev.currentTarget.value.split(",")[0]);
+            navigate(ev.currentTarget.value.split(",")[0]);
           }
         }}
       >
@@ -173,7 +206,12 @@ function Tree({
         <CollapsibleContent>
           <SidebarMenuSub>
             {item.children.map((subItem) => (
-              <Tree key={subItem.sha} item={subItem} parent={item.path} />
+              <Tree
+                key={subItem.sha}
+                item={subItem}
+                parent={item.path}
+                navigate={navigate}
+              />
             ))}
           </SidebarMenuSub>
         </CollapsibleContent>
