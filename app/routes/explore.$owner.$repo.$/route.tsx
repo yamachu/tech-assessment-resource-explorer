@@ -9,6 +9,7 @@ import {
   useSetSelectedPath,
 } from "~/components/Context/SelectedPathContext";
 import { useTextContent } from "~/queries/hooks";
+import { transform } from "~/utils/url";
 
 export default function Index() {
   const params = useParams();
@@ -29,25 +30,7 @@ export default function Index() {
         remarkPlugins={[remarkGfm]}
         urlTransform={(url, key, node) => {
           if (node.tagName === "img") {
-            // TODO: ホンマにこうか確かめるのと、テスト
-            if (url.startsWith("https://github.com")) {
-              url.replace("https://github.com", "/api/image");
-            } else if (url.startsWith(".")) {
-              if (url.startsWith("..")) {
-                const tmp = url.split("/");
-                return (
-                  [...tmp.slice(0, tmp.length - 2)].join("/") + url.substring(2)
-                );
-              }
-              // FIXME: like path resolve...
-              return (
-                "/api/image/" +
-                `${owner}/${repo}/` +
-                path.substring(0, path.lastIndexOf("/")) +
-                url.substring(1)
-              );
-            }
-            return url;
+            return transform(`${owner}/${repo}/${path}`, url);
           }
           return defaultUrlTransform(url);
         }}
