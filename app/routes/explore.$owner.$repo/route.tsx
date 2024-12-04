@@ -1,15 +1,7 @@
-import { useOutlet, useParams } from "@remix-run/react";
-import { useEffect } from "react";
-import { useSetRepository } from "~/components/Context/RepositoryContext";
+import { useOutlet } from "@remix-run/react";
 
 export default function Index() {
-  const params = useParams();
   const outlet = useOutlet();
-  const setRepository = useSetRepository();
-
-  useEffect(() => {
-    setRepository(params["repo"]!);
-  }, [setRepository, params]);
 
   if (outlet) {
     return outlet;
