@@ -1,15 +1,7 @@
-import { useOutlet, useParams } from "@remix-run/react";
-import { useEffect } from "react";
-import { useSetOwner } from "~/components/Context/OwnerContext";
+import { useOutlet } from "@remix-run/react";
 
 export default function Index() {
-  const params = useParams();
   const outlet = useOutlet();
-  const setOwner = useSetOwner();
-
-  useEffect(() => {
-    setOwner(params["owner"]!);
-  }, [setOwner, params]);
 
   if (outlet) {
     return outlet;

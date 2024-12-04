@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "@remix-run/react";
+import { Outlet, useNavigate, useParams } from "@remix-run/react";
 import { useCallback } from "react";
 import {
   OwnerContextProvider,
@@ -49,10 +49,12 @@ import { useGitTree, useOwners, useRepositories } from "~/queries/hooks";
 import type { Flatten } from "~/utils/types";
 
 export default function Layout() {
+  const parameter = useParams();
+
   return (
-    <OwnerContextProvider>
-      <RepositoryContextProvider>
-        <SelectedPathContextProvider>
+    <OwnerContextProvider owner={parameter["owner"]}>
+      <RepositoryContextProvider repository={parameter["repo"]}>
+        <SelectedPathContextProvider selectedPath={parameter["*"]}>
           <SidebarProvider defaultOpen>
             <ResizableWrapped>
               <Outlet />
