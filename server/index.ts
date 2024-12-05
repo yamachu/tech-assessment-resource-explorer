@@ -44,6 +44,10 @@ app.use(async (c, next) => {
   if (c.env.USE_GITHUB_APP) {
     const gitHubApp = await new GitHubApp({
       appId: c.env.GITHUB_APP_ID,
+      // Supports only PKCS8 PEM format
+      // run: openssl pkcs8 -topk8 -inform PEM -outform PEM -in private_key_pkcs1.pem -out private_key_pkcs8.pem -nocrypt
+      // and convert oneline
+      // run: cat private_key_pkcs8.pem | awk '{printf "%s\\n", $0}'
       privateKey: c.env.GITHUB_APP_PRIVATE_KEY,
     }).getInstallationOctokit(JSON.parse(c.env.GITHUB_APP_INSTALLATION_ID));
     c.set("octokit", gitHubApp);
