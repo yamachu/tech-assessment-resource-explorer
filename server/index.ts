@@ -1,7 +1,7 @@
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { Octokit } from "octokit";
+import { App as GitHubApp, Octokit } from "octokit";
 import { allowedOwners, allowedRepos } from "./constants";
 import {
   fetchRepositoryBinaryContent,
@@ -12,6 +12,15 @@ import {
 type Env = {
   Variables: {
     octokit: Octokit;
+  };
+  Bindings: {
+    USE_GITHUB_APP: string; // we treat this truthy or falsy, so "false" is true
+    // if USE_GITHUB_APP is false
+    GITHUB_TOKEN: string;
+    // if USE_GITHUB_APP is true
+    GITHUB_APP_ID: string;
+    GITHUB_APP_PRIVATE_KEY: string;
+    GITHUB_APP_INSTALLATION_ID: string;
   };
 };
 
@@ -32,14 +41,20 @@ app.use(
 );
 
 app.use(async (c, next) => {
-  c.set(
-    "octokit",
-    new Octokit({
-      // TODO: use GitHub App based authentication
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      auth: (c.env as any).GITHUB_TOKEN,
-    })
-  );
+  if (c.env.USE_GITHUB_APP) {
+    const gitHubApp = await new GitHubApp({
+      appId: c.env.GITHUB_APP_ID,
+      privateKey: c.env.GITHUB_APP_PRIVATE_KEY,
+    }).getInstallationOctokit(JSON.parse(c.env.GITHUB_APP_INSTALLATION_ID));
+    c.set("octokit", gitHubApp);
+  } else {
+    c.set(
+      "octokit",
+      new Octokit({
+        auth: c.env.GITHUB_TOKEN,
+      })
+    );
+  }
 
   await next();
 });
