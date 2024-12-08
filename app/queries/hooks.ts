@@ -70,7 +70,10 @@ export const useTextContent = (owner: string, repo: string, path: string) => {
         },
       });
 
-      return res.json().then((data) => data.body);
+      if (res.ok && res.status === 200) {
+        return res.json().then((data) => data.body);
+      }
+      throw new Error("Failed to fetch content");
     },
     enabled: owner !== "" && repo !== "" && path !== "",
   });
