@@ -4,4 +4,5 @@ export const keys = {
   gitTree: (owner: string, repo: string) => ["gitTree", owner, repo] as const,
   textContent: (owner: string, repo: string, path: string) =>
     ["textContent", owner, repo, path] as const,
+  authors: (owner: string, repo: string) => ["authors", owner, repo] as const,
 };
