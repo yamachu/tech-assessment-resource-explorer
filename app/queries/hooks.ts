@@ -78,3 +78,24 @@ export const useTextContent = (owner: string, repo: string, path: string) => {
     enabled: owner !== "" && repo !== "" && path !== "",
   });
 };
+
+export const useAuthors = (owner: string, repo: string) => {
+  const honoClient = useHonoClient();
+  return useQuery({
+    queryKey: keys.authors(owner, repo),
+    queryFn: async () => {
+      const res = await honoClient.api.authors[":owner"][":repo"].$get({
+        param: {
+          owner,
+          repo,
+        },
+      });
+
+      if (res.ok && res.status === 200) {
+        return res.json().then((data) => data.authors);
+      }
+      throw new Error("Failed to fetch authors");
+    },
+    enabled: owner !== "" && repo !== "",
+  });
+};

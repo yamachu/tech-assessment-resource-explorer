@@ -49,7 +49,7 @@ export const fetchRepositoryBinaryContent = async (
   return Buffer.from(data.content, data.encoding);
 };
 
-export const fetchRepositoryTree = async (
+const fetchRepositoryFiles = async (
   octokit: Octokit,
   params: {
     owner: string;
@@ -90,6 +90,19 @@ export const fetchRepositoryTree = async (
 
   // https://docs.github.com/ja/rest/git/trees?apiVersion=2022-11-28#get-a-tree
   // if repositoryFiles.data.truncated ...
+  return repositoryFiles;
+};
+
+export const fetchRepositoryTree = async (
+  octokit: Octokit,
+  params: {
+    owner: string;
+    repo: string;
+  }
+) => {
+  const { owner, repo } = params;
+  const repositoryFiles = await fetchRepositoryFiles(octokit, { owner, repo });
+
   const trees = repositoryFiles.data.tree.filter((v) => v.type === "tree") as {
     path: string;
     mode: string;
@@ -115,6 +128,71 @@ export const fetchRepositoryTree = async (
   return entireTree;
 };
 
-// TODO: Get Author account...
-// maybe octokit.rest.repos.listCommits is useful
-// usecase: fetch specified user's files
+export const fetchMaybeDocumentFileAuthor = async (
+  octokit: Octokit,
+  params: {
+    owner: string;
+    repo: string;
+  }
+) => {
+  const { owner, repo } = params;
+  const repositoryFiles = await fetchRepositoryFiles(octokit, { owner, repo });
+
+  const paths = repositoryFiles.data.tree
+    .map(({ path }) => path)
+    .filter((v) => v !== undefined)
+    .filter(
+      (v) =>
+        v.endsWith(".md") ||
+        v.endsWith(".txt") ||
+        v.endsWith(".text") ||
+        v.endsWith(".pdf")
+    );
+  const response = await octokit.graphql(
+    `
+    query($owner: String!, $repo: String!) {
+      repository(owner: $owner, name: $repo) {
+        ${repositoryFiles.data.tree
+          .map(
+            ({ path }, index) => `
+            # https://docs.github.com/ja/graphql/reference/interfaces#gitobject
+          file${index + 1}: object(expression: "HEAD") {
+            ... on Commit {
+              history(first: 1, path: "${path}") {
+                edges {
+                  node {
+                    author {
+                      user {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `
+          )
+          .join("\n")}
+      }
+    }
+    `,
+    {
+      owner,
+      repo,
+    }
+  );
+
+  return paths.map<{
+    path: string;
+    login: string;
+  }>((_, index) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const commit = (response as any).repository[`file${index + 1}`].history
+      .edges[0].node;
+    return {
+      path: paths[index],
+      login: commit.author.user?.login,
+    };
+  });
+};

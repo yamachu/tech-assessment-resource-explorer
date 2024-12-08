@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { App as GitHubApp, Octokit } from "octokit";
 import { allowedOwners, allowedRepos } from "./constants";
 import {
+  fetchMaybeDocumentFileAuthor,
   fetchRepositoryBinaryContent,
   fetchRepositoryContent,
   fetchRepositoryTree,
@@ -172,6 +173,22 @@ const routes = app
     return c.json({
       repositories: maybeRepos[1],
     });
+  })
+  .get("/api/authors/:owner/:repo", async (c) => {
+    const { owner, repo } = c.req.param();
+    if (!isValidOwner(owner) || !isValidRepo(owner, repo)) {
+      return c.json(
+        {
+          error: "Bad Request",
+        },
+        400
+      );
+    }
+    const author = await fetchMaybeDocumentFileAuthor(c.get("octokit"), {
+      owner,
+      repo,
+    });
+    return c.json({ authors: author });
   });
 
 export default app;
