@@ -8,6 +8,7 @@ import {
   fetchRepositoryContent,
   fetchRepositoryTree,
 } from "./utils/github";
+import { isValidOwner, isValidRepo } from "./utils/validator";
 
 type Env = {
   Variables: {
@@ -85,6 +86,14 @@ app.use(async (c, next) => {
 const routes = app
   .get("/api/tree/:owner/:repo", async (c) => {
     const { owner, repo } = c.req.param();
+    if (!isValidOwner(owner) || !isValidRepo(owner, repo)) {
+      return c.json(
+        {
+          error: "Bad Request",
+        },
+        400
+      );
+    }
     const tree = await fetchRepositoryTree(c.get("octokit"), {
       owner,
       repo,
@@ -96,6 +105,14 @@ const routes = app
   })
   .get("/api/content/:owner/:repo/:path{.*}", async (c) => {
     const { owner, repo, path } = c.req.param();
+    if (!isValidOwner(owner) || !isValidRepo(owner, repo)) {
+      return c.json(
+        {
+          error: "Bad Request",
+        },
+        400
+      );
+    }
     const body = await fetchRepositoryContent(c.get("octokit"), {
       owner,
       repo,
@@ -108,6 +125,14 @@ const routes = app
   })
   .get("/api/image/:owner/:repo/:path{.*}", async (c) => {
     const { owner, repo, path } = c.req.param();
+    if (!isValidOwner(owner) || !isValidRepo(owner, repo)) {
+      return c.json(
+        {
+          error: "Bad Request",
+        },
+        400
+      );
+    }
     const buffer = await fetchRepositoryBinaryContent(c.get("octokit"), {
       owner,
       repo,
@@ -125,7 +150,7 @@ const routes = app
   })
   .get("/api/repositories/:owner", async (c) => {
     const { owner: reqOwner } = c.req.param();
-    if (!allowedOwners.includes(reqOwner)) {
+    if (!isValidOwner(reqOwner)) {
       return c.json(
         {
           error: "Bad Request",
