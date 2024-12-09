@@ -58,28 +58,37 @@ const fetchRepositoryFiles = async (
 ) => {
   const { owner, repo } = params;
 
-  // リポジトリのデフォルトブランチを取得
-  const repoInfo = await octokit.rest.repos.get({
-    owner,
-    repo,
-  });
-  const defaultBranch = repoInfo.data.default_branch;
-
-  // デフォルトブランチの最新コミットを取得
-  const branchInfo = await octokit.rest.repos.getBranch({
-    owner,
-    repo,
-    branch: defaultBranch,
-  });
-  const latestCommitSha = branchInfo.data.commit.sha;
-
-  // 最新コミットのツリーSHAを取得
-  const commitInfo = await octokit.rest.git.getCommit({
-    owner,
-    repo,
-    commit_sha: latestCommitSha,
-  });
-  const treeSha = commitInfo.data.tree.sha;
+  const treeResponse = await octokit.graphql<{
+    repository: {
+      defaultBranchRef: {
+        name: string;
+        target: { tree: { oid: string } };
+      };
+    };
+  }>(
+    `
+    query($owner: String!, $repo: String!) {
+      repository(owner: $owner, name: $repo) {
+        defaultBranchRef {
+          name
+          target {
+            ... on Commit {
+              tree {
+                oid
+              }
+            }
+          }
+        }
+      }
+    }
+    `,
+    {
+      owner,
+      repo,
+    }
+  );
+  const treeSha: string =
+    treeResponse.repository.defaultBranchRef.target.tree.oid;
 
   const repositoryFiles = await octokit.rest.git.getTree({
     owner,
