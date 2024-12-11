@@ -161,9 +161,9 @@ export const fetchMaybeDocumentFileAuthor = async (
     `
     query($owner: String!, $repo: String!) {
       repository(owner: $owner, name: $repo) {
-        ${repositoryFiles.data.tree
+        ${paths
           .map(
-            ({ path }, index) => `
+            (path, index) => `
             # https://docs.github.com/ja/graphql/reference/interfaces#gitobject
           file${index + 1}: object(expression: "HEAD") {
             ... on Commit {
